@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wizard.io</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #1e1e2f;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #2c2f33;
+      border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let wizard = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 20,
+      color: "#6a0dad",
+      speed: 3,
+      angle: 0,
+      spells: [],
+      xp: 0,
+      level: 1
+    };
+
+    let keys = {};
+    document.addEventListener('keydown', e => keys[e.key] = true);
+    document.addEventListener('keyup', e => keys[e.key] = false);
+
+    canvas.addEventListener("mousemove", e => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      wizard.angle = Math.atan2(mouseY - wizard.y, mouseX - wizard.x);
+    });
+
+    canvas.addEventListener("click", () => {
+      wizard.spells.push({
+        x: wizard.x,
+        y: wizard.y,
+        angle: wizard.angle,
+        speed: 6,
+        radius: 5,
+        color: "cyan"
+      });
+    });
+
+    let shapes = [];
+    function spawnShape() {
+      shapes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: 10 + Math.random() * 15,
+        color: "orange"
+      });
+    }
+    setInterval(spawnShape, 1000);
+
+    function moveWizard() {
+      if (keys["w"] || keys["ArrowUp"]) wizard.y -= wizard.speed;
+      if (keys["s"] || keys["ArrowDown"]) wizard.y += wizard.speed;
+      if (keys["a"] || keys["ArrowLeft"]) wizard.x -= wizard.speed;
+      if (keys["d"] || keys["ArrowRight"]) wizard.x += wizard.speed;
+    }
+
+    function updateSpells() {
+      wizard.spells.forEach(spell => {
+        spell.x += Math.cos(spell.angle) * spell.speed;
+        spell.y += Math.sin(spell.angle) * spell.speed;
+      });
+      wizard.spells = wizard.spells.filter(spell => spell.x > 0 && spell.x < canvas.width && spell.y > 0 && spell.y < canvas.height);
+    }
+
+    function checkCollisions() {
+      shapes = shapes.filter(shape => {
+        for (let i = 0; i < wizard.spells.length; i++) {
+          const spell = wizard.spells[i];
+          const dx = spell.x - shape.x;
+          const dy = spell.y - shape.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < spell.radius + shape.radius) {
+            wizard.xp += 5;
+            if (wizard.xp >= wizard.level * 20) {
+              wizard.level++;
+              wizard.xp = 0;
+              alert("Level Up! You're now level " + wizard.level);
+            }
+            wizard.spells.splice(i, 1);
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function drawCircle(obj) {
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = obj.color;
+      ctx.fill();
+    }
+
+    function drawUI() {
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.fillText("XP: " + wizard.xp + " / " + (wizard.level * 20), 10, 20);
+      ctx.fillText("Level: " + wizard.level, 10, 40);
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      moveWizard();
+      updateSpells();
+      checkCollisions();
+
+      drawCircle(wizard);
+      wizard.spells.forEach(drawCircle);
+      shapes.forEach(drawCircle);
+      drawUI();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
