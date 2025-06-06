@@ -4,24 +4,32 @@
   <meta charset="UTF-8">
   <title>Wizard.io</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       overflow: hidden;
+      height: 100%;
       background: #1e1e2f;
     }
     canvas {
       display: block;
-      margin: 0 auto;
       background-color: #2c2f33;
       border: 2px solid #fff;
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <canvas id="gameCanvas"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     let wizard = {
       x: canvas.width / 2,
@@ -32,7 +40,8 @@
       angle: 0,
       spells: [],
       xp: 0,
-      level: 1
+      level: 1,
+      levelMessage: ""
     };
 
     let keys = {};
@@ -46,7 +55,11 @@
       wizard.angle = Math.atan2(mouseY - wizard.y, mouseX - wizard.x);
     });
 
-    canvas.addEventListener("click", () => {
+    let mouseDown = false;
+    canvas.addEventListener("mousedown", () => { mouseDown = true; });
+    canvas.addEventListener("mouseup", () => { mouseDown = false; });
+
+    function shootSpell() {
       wizard.spells.push({
         x: wizard.x,
         y: wizard.y,
@@ -55,7 +68,10 @@
         radius: 5,
         color: "cyan"
       });
-    });
+    }
+
+    let lastShotTime = 0;
+    const shootCooldown = 200; // ms
 
     let shapes = [];
     function spawnShape() {
@@ -95,7 +111,8 @@
             if (wizard.xp >= wizard.level * 20) {
               wizard.level++;
               wizard.xp = 0;
-              alert("Level Up! You're now level " + wizard.level);
+              wizard.levelMessage = "Level Up! Now level " + wizard.level;
+              setTimeout(() => wizard.levelMessage = "", 3000);
             }
             wizard.spells.splice(i, 1);
             return false;
@@ -117,11 +134,23 @@
       ctx.font = "16px Arial";
       ctx.fillText("XP: " + wizard.xp + " / " + (wizard.level * 20), 10, 20);
       ctx.fillText("Level: " + wizard.level, 10, 40);
+
+      if (wizard.levelMessage) {
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "yellow";
+        ctx.fillText(wizard.levelMessage, canvas.width / 2 - 100, 60);
+      }
     }
 
-    function gameLoop() {
+    function gameLoop(timestamp) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       moveWizard();
+
+      if (mouseDown && (!lastShotTime || timestamp - lastShotTime > shootCooldown)) {
+        shootSpell();
+        lastShotTime = timestamp;
+      }
+
       updateSpells();
       checkCollisions();
 
@@ -133,7 +162,7 @@
       requestAnimationFrame(gameLoop);
     }
 
-    gameLoop();
+    requestAnimationFrame(gameLoop);
   </script>
 </body>
 </html>
