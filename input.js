@@ -2,6 +2,14 @@ let mouseDown = false;
 window.keys = {};
 let chatVisible = true;
 
+window.addEventListener("keydown", e => {
+  window.keys[e.key] = true;
+});
+
+window.addEventListener("keyup", e => {
+  window.keys[e.key] = false;
+});
+
 window.onload = () => {
   const canvas = document.getElementById("gameCanvas");
 
