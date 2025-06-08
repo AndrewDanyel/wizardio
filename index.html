@@ -16,10 +16,37 @@
       background-color: #2c2f33;
       border: 2px solid #fff;
     }
+    #chat {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      width: 300px;
+      max-height: 150px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      padding: 10px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      overflow-y: auto;
+    }
+    #chatInput {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 5px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+  <div id="chat">
+    <div id="chatMessages"></div>
+    <input id="chatInput" type="text" placeholder="Type a message...">
+  </div>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -41,7 +68,9 @@
       spells: [],
       xp: 0,
       level: 1,
-      levelMessage: ""
+      levelMessage: "",
+      chatBubble: "",
+      chatTimer: 0
     };
 
     let keys = {};
@@ -140,6 +169,34 @@
         ctx.fillStyle = "yellow";
         ctx.fillText(wizard.levelMessage, canvas.width / 2 - 100, 60);
       }
+
+      if (wizard.chatBubble) {
+        ctx.font = "14px Arial";
+        ctx.fillStyle = "white";
+        ctx.fillText(wizard.chatBubble, wizard.x - 30, wizard.y - wizard.radius - 10);
+      }
+    }
+
+    const chatInput = document.getElementById("chatInput");
+    const chatMessages = document.getElementById("chatMessages");
+    chatInput.addEventListener("keydown", e => {
+      if (e.key === "Enter" && chatInput.value.trim() !== "") {
+        const msg = chatInput.value.trim();
+        const msgEl = document.createElement("div");
+        msgEl.textContent = msg;
+        chatMessages.appendChild(msgEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        wizard.chatBubble = msg;
+        wizard.chatTimer = 180; // show for 3 seconds
+        chatInput.value = "";
+      }
+    });
+
+    function updateChatBubble() {
+      if (wizard.chatTimer > 0) {
+        wizard.chatTimer--;
+        if (wizard.chatTimer === 0) wizard.chatBubble = "";
+      }
     }
 
     function gameLoop(timestamp) {
@@ -153,6 +210,7 @@
 
       updateSpells();
       checkCollisions();
+      updateChatBubble();
 
       drawCircle(wizard);
       wizard.spells.forEach(drawCircle);
