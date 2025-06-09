@@ -10,5 +10,7 @@ document.getElementById("startButton").addEventListener("click", () => {
     wizard.name = name;
     wizard.color = color;
 
+    socket.emit('playerInfo', { name, color });
+
     document.getElementById("menu").style.display = "none";
 });

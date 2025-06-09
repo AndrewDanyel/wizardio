@@ -17,13 +17,29 @@ socket.on('chatMessage', data => {
 socket.on('currentPlayers', allPlayers => {
   for (const id in allPlayers) {
     if (id !== socket.id) {
-      players[id] = allPlayers[id];
+      players[id] = { ...allPlayers[id], spells: [] };
     }
   }
 });
 
 socket.on('newPlayer', data => {
-  players[data.id] = data;
+  players[data.id] = { ...data, spells: [] };
+});
+
+socket.on('playerUpdated', data => {
+  if (players[data.id]) {
+    players[data.id] = { ...players[data.id], ...data };
+  }
+});
+
+socket.on('spellShot', data => {
+  if (players[data.id]) {
+    players[data.id].spells.push(data.spell);
+  }
+});
+
+socket.on('takeDamage', () => {
+  if (wizard.hp > 0) wizard.hp--;
 });
 
 socket.on('playerMoved', data => {
@@ -31,6 +47,8 @@ socket.on('playerMoved', data => {
     players[data.id].x = data.x;
     players[data.id].y = data.y;
     players[data.id].angle = data.angle;
+    if (data.name) players[data.id].name = data.name;
+    if (data.color) players[data.id].color = data.color;
   }
 });
 
@@ -78,6 +96,18 @@ function updateSpells() {
     spell.y += Math.sin(spell.angle) * spell.speed;
   });
 
+  for (const id in players) {
+    players[id].spells.forEach(spell => {
+      spell.x += Math.cos(spell.angle) * spell.speed;
+      spell.y += Math.sin(spell.angle) * spell.speed;
+    });
+
+    players[id].spells = players[id].spells.filter(spell =>
+      spell.x > 0 && spell.x < mapWidth &&
+      spell.y > 0 && spell.y < mapHeight
+    );
+  }
+
   wizard.spells = wizard.spells.filter(spell =>
     spell.x > 0 && spell.x < mapWidth &&
     spell.y > 0 && spell.y < mapHeight
@@ -124,9 +154,10 @@ function gameLoop(timestamp) {
     drawShape({
       ...other,
       radius: 20,
-      color: "#888"
+      color: other.color || "#888"
     });
     drawChatBubble(other);
+    other.spells.forEach(drawShape);
   }
 
   wizard.spells.forEach(drawShape);

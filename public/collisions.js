@@ -24,6 +24,38 @@ function checkCollisions() {
     }
   }
 
+  // Our spells hitting other players
+  for (const id in players) {
+    const other = players[id];
+    for (let i = wizard.spells.length - 1; i >= 0; i--) {
+      const spell = wizard.spells[i];
+      const dx = spell.x - other.x;
+      const dy = spell.y - other.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < spell.radius + 20) {
+        wizard.spells.splice(i, 1);
+        socket.emit('playerHit', id);
+        break;
+      }
+    }
+  }
+
+  // Spells from others hitting us
+  for (const id in players) {
+    const other = players[id];
+    for (let i = other.spells.length - 1; i >= 0; i--) {
+      const spell = other.spells[i];
+      const dx = spell.x - wizard.x;
+      const dy = spell.y - wizard.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < spell.radius + wizard.radius) {
+        other.spells.splice(i, 1);
+        if (wizard.hp > 0) wizard.hp--;
+        break;
+      }
+    }
+  }
+
   // Damage from touching shapes
   for (let shape of shapes) {
     const dx = wizard.x - shape.x;

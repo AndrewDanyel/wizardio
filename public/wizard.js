@@ -26,5 +26,15 @@ window.shootSpell = function () {
     radius: 5,
     color: "cyan"
   });
+  if (typeof socket !== 'undefined') {
+    socket.emit('shootSpell', {
+      x: wizard.x,
+      y: wizard.y,
+      angle: wizard.angle,
+      speed: 6,
+      radius: 5,
+      color: 'cyan'
+    });
+  }
 };
 
