@@ -13,10 +13,12 @@ const wizard = {
   maxHp: 10,
   levelMessage: "",
   chatBubble: "",
-  chatTimer: 0
+  chatTimer: 0,
+  invincibility: 0
 };
 
 window.shootSpell = function () {
+  if (!window.gameStarted) return;
   console.log("Spell shot");
   wizard.spells.push({
     x: wizard.x,

@@ -1,5 +1,6 @@
 const socket = io();
 const players = {};
+window.gameStarted = false;
 
 socket.on('chatMessage', data => {
   if (data.id === socket.id) return;
@@ -72,6 +73,7 @@ let lastShotTime = 0;
 const shootCooldown = 200;
 
 function moveWizard() {
+  if (!window.gameStarted) return;
   if (window.keys["w"] || window.keys["ArrowUp"]) wizard.y -= wizard.speed;
   if (window.keys["s"] || window.keys["ArrowDown"]) wizard.y += wizard.speed;
   if (window.keys["a"] || window.keys["ArrowLeft"]) wizard.x -= wizard.speed;
@@ -91,6 +93,7 @@ function moveWizard() {
 }
 
 function updateSpells() {
+  if (!window.gameStarted) return;
   wizard.spells.forEach(spell => {
     spell.x += Math.cos(spell.angle) * spell.speed;
     spell.y += Math.sin(spell.angle) * spell.speed;
@@ -125,9 +128,11 @@ function drawChatBubble(player) {
   ctx.font = "14px Arial";
   ctx.fillStyle = "white";
 
-  const textX = player.x - maxWidth / 2 - cameraX;
+  ctx.textAlign = "center";
+  const textX = player.x - cameraX;
   const textY = player.y - player.radius - 20 - cameraY;
   drawWrappedText(player.chatBubble, textX, textY, maxWidth, lineHeight);
+  ctx.textAlign = "start";
 
   if (player.chatTimer === 0) player.chatBubble = "";
 }
@@ -145,6 +150,7 @@ function gameLoop(timestamp) {
   updateSpells();
   checkCollisions();
   updateChatBubble();
+  if (wizard.invincibility > 0) wizard.invincibility--;
 
   drawShape(wizard);
   drawChatBubble(wizard);

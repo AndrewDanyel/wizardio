@@ -81,14 +81,14 @@ function drawWrappedText(text, x, y, maxWidth, lineHeight) {
     const metrics = ctx.measureText(testLine);
     const testWidth = metrics.width;
     if (testWidth > maxWidth && n > 0) {
-      ctx.fillText(line, x, yy);
+      ctx.fillText(line.trim(), x, yy);
       line = words[n] + " ";
       yy += lineHeight;
     } else {
       line = testLine;
     }
   }
-  ctx.fillText(line, x, yy);
+  ctx.fillText(line.trim(), x, yy);
 }
 
 function drawUI() {
@@ -96,9 +96,9 @@ function drawUI() {
 
   ctx.fillStyle = "white";
   ctx.font = "16px Arial";
-  ctx.fillText("XP: " + wizard.xp + " / " + (wizard.level * 20), 10, 20);
-  ctx.fillText("Level: " + wizard.level, 10, 40);
-  ctx.fillText("HP: " + wizard.hp + " / " + wizard.maxHp, 10, 60);
+  ctx.fillText("XP: " + wizard.xp + " / " + (wizard.level * 20), 20, 30);
+  ctx.fillText("Level: " + wizard.level, 20, 50);
+  ctx.fillText("HP: " + wizard.hp + " / " + wizard.maxHp, 20, 70);
 
   if (wizard.levelMessage) {
     ctx.font = "30px Arial";
@@ -111,9 +111,11 @@ function drawUI() {
     ctx.fillStyle = "white";
     const maxWidth = 200;
     const lineHeight = 16;
-    const textX = wizard.x - maxWidth / 2 - cameraX;
+    ctx.textAlign = "center";
+    const textX = wizard.x - cameraX;
     const textY = wizard.y - wizard.radius - 20 - cameraY;
     drawWrappedText(wizard.chatBubble, textX, textY, maxWidth, lineHeight);
+    ctx.textAlign = "start";
   }
 }
 

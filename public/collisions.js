@@ -1,4 +1,5 @@
 function checkCollisions() {
+  if (!window.gameStarted) return;
   for (let i = wizard.spells.length - 1; i >= 0; i--) {
     const spell = wizard.spells[i];
     for (let j = shapes.length - 1; j >= 0; j--) {
@@ -50,7 +51,10 @@ function checkCollisions() {
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < spell.radius + wizard.radius) {
         other.spells.splice(i, 1);
-        if (wizard.hp > 0) wizard.hp--;
+        if (wizard.invincibility <= 0 && wizard.hp > 0) {
+          wizard.hp--;
+          wizard.invincibility = 60;
+        }
         break;
       }
     }
@@ -62,7 +66,10 @@ function checkCollisions() {
     const dy = wizard.y - shape.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     if (dist < wizard.radius + shape.radius) {
-      if (wizard.hp > 0) wizard.hp--;
+      if (wizard.invincibility <= 0 && wizard.hp > 0) {
+        wizard.hp--;
+        wizard.invincibility = 60;
+      }
       break;
     }
   }
