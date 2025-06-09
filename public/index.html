@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Wizard.io</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="menu">
+    <h2>Welcome to Wizard.io</h2>
+    <label>Name:</label>
+    <input type="text" id="nameInput" placeholder="Enter your name" /><br /><br />
+    <label>Color:</label>
+    <input type="color" id="colorInput" value="#6a0dad" /><br /><br />
+    <button id="startButton">Play</button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+  <div id="chat">
+    <div id="chatMessages"></div>
+    <input id="chatInput" type="text" placeholder="Type a message...">
+  </div>
+
+  <!-- Modular JS Files -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="wizard.js"></script>
+  <script src="shapes.js"></script>
+  <script src="input.js"></script>
+  <script src="collisions.js"></script>
+  <script src="ui.js"></script>
+  <script src="menu.js"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>
