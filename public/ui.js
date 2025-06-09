@@ -96,9 +96,9 @@ function drawUI() {
 
   ctx.fillStyle = "white";
   ctx.font = "16px Arial";
-  ctx.fillText("XP: " + wizard.xp + " / " + (wizard.level * 20), 20, 30);
-  ctx.fillText("Level: " + wizard.level, 20, 50);
-  ctx.fillText("HP: " + wizard.hp + " / " + wizard.maxHp, 20, 70);
+  ctx.fillText("XP: " + wizard.xp + " / " + (wizard.level * 20), 50, 30);
+  ctx.fillText("Level: " + wizard.level, 50, 50);
+  ctx.fillText("HP: " + wizard.hp + " / " + wizard.maxHp, 50, 70);
 
   if (wizard.levelMessage) {
     ctx.font = "30px Arial";
