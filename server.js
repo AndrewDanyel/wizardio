@@ -10,10 +10,17 @@ let players = {};
 io.on('connection', socket => {
   console.log('A user connected:', socket.id);
 
-  players[socket.id] = { x: 100, y: 100, angle: 0 };
+  players[socket.id] = { x: 100, y: 100, angle: 0, name: '', color: '#888' };
 
   socket.emit('currentPlayers', players);
   socket.broadcast.emit('newPlayer', { id: socket.id, ...players[socket.id] });
+
+  socket.on('playerInfo', data => {
+    if (players[socket.id]) {
+      players[socket.id] = { ...players[socket.id], ...data };
+      io.emit('playerUpdated', { id: socket.id, ...players[socket.id] });
+    }
+  });
 
   // ✅ only one listener per socket
   socket.on('move', data => {
@@ -29,6 +36,14 @@ io.on('connection', socket => {
       id: socket.id,
       message: msg
     });
+  });
+
+  socket.on('shootSpell', spell => {
+    socket.broadcast.emit('spellShot', { id: socket.id, spell });
+  });
+
+  socket.on('playerHit', targetId => {
+    io.to(targetId).emit('takeDamage');
   });
 
   socket.on('disconnect', () => {
